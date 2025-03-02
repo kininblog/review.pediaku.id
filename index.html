@@ -1,43 +1,167 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog Review Platform</title>
+    <title>Blog Review - Static Version</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script type="module" src="/app.js"></script>
+    <script>
+        // Fungsi utama yang akan dijalankan saat halaman dimuat
+        function init() {
+            handleRouting();
+            setupForm();
+        }
+
+        // Handle routing client-side
+        function handleRouting() {
+            const path = getDomainFromURL();
+            if(path) {
+                loadReview(path);
+                document.getElementById('domainInput').value = path;
+            }
+        }
+
+        // Setup form submission
+        function setupForm() {
+            document.getElementById('reviewForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const domain = document.getElementById('domainInput').value.trim();
+                if(validateDomain(domain)) {
+                    window.history.pushState({}, '', `/${domain}`);
+                    await loadReview(domain);
+                }
+            });
+        }
+
+        // Validasi format domain
+        function validateDomain(domain) {
+            const regex = /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
+            if(!regex.test(domain)) {
+                showError('Format domain tidak valid. Contoh: contoh.com');
+                return false;
+            }
+            return true;
+        }
+
+        // Fungsi utama untuk memuat review
+        async function loadReview(domain) {
+            try {
+                showLoading();
+                
+                // Gunakan proxy CORS untuk menghindari masalah CORS
+                const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://${domain}`)}`);
+                const data = await response.json();
+                
+                if(data.status.http_code !== 200) throw new Error('Gagal memuat situs');
+                
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(data.contents, 'text/html');
+                
+                renderReview({
+                    domain: domain,
+                    title: doc.querySelector('title')?.textContent || 'Tidak ada judul',
+                    description: doc.querySelector('meta[name="description"]')?.content || '',
+                    url: `https://${domain}`
+                });
+                
+                injectSchemaMarkup(domain);
+                
+            } catch (error) {
+                showError(error.message || 'Terjadi kesalahan');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Render hasil ke HTML
+        function renderReview(data) {
+            const template = `
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6 animate-fade-in">
+                    <h2 class="text-2xl font-bold mb-4">${data.title}</h2>
+                    ${data.description ? `<p class="text-gray-600 mb-4">${data.description}</p>` : ''}
+                    <div class="space-y-2 text-sm">
+                        <p><span class="font-semibold">Domain:</span> ${data.domain}</p>
+                        <p><span class="font-semibold">URL:</span> <a href="${data.url}" target="_blank" class="text-blue-600">${data.url}</a></p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('content').innerHTML = template;
+        }
+
+        // Inject schema markup untuk SEO
+        function injectSchemaMarkup(domain) {
+            const schema = {
+                "@context": "https://schema.org",
+                "@type": "Review",
+                "itemReviewed": {
+                    "@type": "WebSite",
+                    "name": domain,
+                    "url": `https://${domain}`
+                },
+                "reviewRating": {
+                    "@type": "Rating",
+                    "ratingValue": "4.5"
+                }
+            };
+            
+            const script = document.createElement('script');
+            script.type = 'application/ld+json';
+            script.textContent = JSON.stringify(schema);
+            document.head.appendChild(script);
+        }
+
+        // Fungsi utilitas
+        function getDomainFromURL() {
+            return window.location.pathname.replace(/\//g, '');
+        }
+
+        function showLoading() {
+            document.getElementById('loading').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.add('hidden');
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('error');
+            errorEl.textContent = message;
+            errorEl.classList.remove('hidden');
+            setTimeout(() => errorEl.classList.add('hidden'), 5000);
+        }
+
+        // Jalankan init saat halaman dimuat
+        window.addEventListener('load', init);
+        window.addEventListener('popstate', handleRouting);
+    </script>
 </head>
-<body class="bg-gray-100">
-    <div id="app" class="container mx-auto px-4 py-8">
-        <!-- Header dan Search Form -->
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-3xl">
         <header class="mb-12 text-center">
-            <h1 class="text-4xl font-bold text-blue-600 mb-4">Blog Review</h1>
-            <form id="searchForm" class="max-w-md mx-auto">
-                <div class="flex gap-2">
-                    <input type="text" id="domainInput" 
-                           class="flex-1 p-2 border rounded-lg"
-                           placeholder="Masukkan domain blog...">
+            <h1 class="text-4xl font-bold text-blue-600 mb-6">Blog Review</h1>
+            <form id="reviewForm" class="mb-8">
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input type="text" 
+                           id="domainInput"
+                           class="flex-grow p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                           placeholder="Masukkan domain blog (contoh: contoh.com)">
                     <button type="submit" 
-                            class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
-                        Cari
+                            class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                        Cari Review
                     </button>
                 </div>
             </form>
         </header>
 
-        <!-- Konten Utama -->
-        <div id="content" class="space-y-8">
-            <!-- Tempatkan review card di sini -->
-        </div>
-
-        <!-- Loading Indicator -->
         <div id="loading" class="hidden text-center py-8">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
         </div>
 
-        <!-- Error Message -->
-        <div id="error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded"></div>
+        <div id="error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"></div>
+
+        <main id="content">
+            <!-- Konten review akan ditampilkan di sini -->
+        </main>
     </div>
 </body>
 </html>
