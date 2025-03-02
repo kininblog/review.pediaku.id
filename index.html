@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog Review - Static Version</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
+ <script>
+        const path = window.location.pathname.slice(1);
+        if(path) {
+            window.location.href = `/?redirect=${encodeURIComponent(path)}`;
+        } else {
+            window.location.href = '/';
+        }
+    </script>
+
     <script>
         // Fungsi utama yang akan dijalankan saat halaman dimuat
         function init() {
@@ -163,5 +173,8 @@
             <!-- Konten review akan ditampilkan di sini -->
         </main>
     </div>
+
+    Redirecting...
+
 </body>
 </html>
