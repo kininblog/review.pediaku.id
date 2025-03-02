@@ -1,271 +1,43 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Review | Pediaku.id</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <style>
-        .shine {
-            background: linear-gradient(90deg, #f6f7f8 0%, #edeef1 40%, #f6f7f8 80%);
-            background-size: 200% 100%;
-            animation: shine 1.5s infinite;
-        }
-        @keyframes shine {
-            to {
-                background-position-x: -200%;
-            }
-        }
-        .hidden {
-            display: none;
-        }
-    </style>
+    <title>Blog Review Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module" src="/app.js"></script>
 </head>
-<body class="bg-gray-100 font-sans">
-    <!-- Header -->
-    <header class="bg-blue-600 text-white shadow-md">
-        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="/" class="text-2xl font-bold">WebReview</a>
-            <p class="text-sm md:text-base">Powered by pediaku.id</p>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8">
-        <!-- Loading State -->
-        <div id="loading-state" class="hidden">
-            <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6 mb-6">
-                <div class="shine h-8 w-3/4 mb-4 rounded"></div>
-                <div class="shine h-4 w-full mb-2 rounded"></div>
-                <div class="shine h-4 w-5/6 mb-6 rounded"></div>
-                <div class="shine h-32 w-full mb-4 rounded"></div>
-                <div class="flex space-x-4 mt-6">
-                    <div class="shine h-10 w-20 rounded"></div>
-                    <div class="shine h-10 w-20 rounded"></div>
+<body class="bg-gray-100">
+    <div id="app" class="container mx-auto px-4 py-8">
+        <!-- Header dan Search Form -->
+        <header class="mb-12 text-center">
+            <h1 class="text-4xl font-bold text-blue-600 mb-4">Blog Review</h1>
+            <form id="searchForm" class="max-w-md mx-auto">
+                <div class="flex gap-2">
+                    <input type="text" id="domainInput" 
+                           class="flex-1 p-2 border rounded-lg"
+                           placeholder="Masukkan domain blog...">
+                    <button type="submit" 
+                            class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                        Cari
+                    </button>
                 </div>
-            </div>
+            </form>
+        </header>
+
+        <!-- Konten Utama -->
+        <div id="content" class="space-y-8">
+            <!-- Tempatkan review card di sini -->
         </div>
 
-        <!-- Error State -->
-        <div id="error-state" class="hidden">
-            <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6 mb-6 text-center">
-                <i class="fas fa-exclamation-triangle text-5xl text-red-500 mb-4"></i>
-                <h2 class="text-2xl font-bold text-red-600 mb-2">Error Retrieving Website Data</h2>
-                <p id="error-message" class="text-gray-700 mb-4">Unable to retrieve data for the specified domain.</p>
-                <a href="/" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors">Return Home</a>
-            </div>
+        <!-- Loading Indicator -->
+        <div id="loading" class="hidden text-center py-8">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
         </div>
 
-        <!-- Success State: Website Review Card -->
-        <div id="review-container" class="hidden">
-            <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden mb-6">
-                <!-- Website Header -->
-                <div class="p-6 border-b">
-                    <div class="flex items-center justify-between flex-wrap">
-                        <div class="flex items-center mb-2 md:mb-0">
-                            <div id="website-favicon" class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-3">
-                                <i class="fas fa-globe text-gray-400"></i>
-                            </div>
-                            <div>
-                                <h1 id="website-title" class="text-xl md:text-2xl font-bold">Website Title</h1>
-                                <a id="website-url" href="#" target="_blank" class="text-blue-600 hover:underline text-sm md:text-base"></a>
-                            </div>
-                        </div>
-                        <div class="mt-3 md:mt-0">
-                            <div class="flex items-center">
-                                <div id="website-rating" class="mr-2 text-lg font-bold">4.5</div>
-                                <div id="website-stars" class="text-yellow-400">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star-half-alt"></i>
-                                </div>
-                            </div>
-                            <div class="text-sm text-gray-500" id="review-count">Based on 123 reviews</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Website Meta Information -->
-                <div class="bg-gray-50 p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-500 mb-1">CNAME Record</h3>
-                            <p id="website-cname" class="font-mono text-sm break-all">example.com</p>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-500 mb-1">Registered</h3>
-                            <p id="website-registered" class="text-sm">January 1, 2020</p>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-500 mb-1">Category</h3>
-                            <p id="website-category" class="text-sm">Blog</p>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-500 mb-1">Language</h3>
-                            <p id="website-language" class="text-sm">English</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Website Description -->
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold mb-2">Website Description</h3>
-                    <p id="website-description" class="text-gray-700">
-                        Loading website description...
-                    </p>
-                </div>
-                
-                <!-- Technology Stack (if available) -->
-                <div class="p-6 bg-gray-50 border-t">
-                    <h3 class="text-lg font-semibold mb-2">Technology Stack</h3>
-                    <div id="tech-stack" class="flex flex-wrap gap-2">
-                        <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700">WordPress</span>
-                        <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700">PHP</span>
-                        <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700">MySQL</span>
-                    </div>
-                </div>
-                
-                <!-- User Reviews Section -->
-                <div class="p-6 border-t">
-                    <h3 class="text-lg font-semibold mb-4">User Reviews</h3>
-                    <div id="user-reviews">
-                        <!-- Sample review, will be populated dynamically -->
-                        <div class="mb-4 pb-4 border-b last:border-b-0">
-                            <div class="flex justify-between items-start mb-2">
-                                <div class="flex items-center">
-                                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-800 font-bold mr-2">J</div>
-                                    <div>
-                                        <div class="font-semibold">John Doe</div>
-                                        <div class="text-xs text-gray-500">2 days ago</div>
-                                    </div>
-                                </div>
-                                <div class="text-yellow-400">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="far fa-star"></i>
-                                </div>
-                            </div>
-                            <p class="text-gray-700">This is a great website with fantastic content. I have been following their blog for over a year now.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Homepage Content (only shown when no domain is specified) -->
-        <div id="homepage-content" class="hidden">
-            <div class="max-w-4xl mx-auto text-center">
-                <h1 class="text-3xl font-bold mb-6">Website Review Platform</h1>
-                <p class="text-gray-700 mb-8">Enter a website URL below to get detailed reviews and information.</p>
-                
-                <form id="search-form" class="mb-8">
-                    <div class="flex flex-col md:flex-row">
-                        <input 
-                            type="text" 
-                            id="search-input" 
-                            placeholder="e.g., example.com" 
-                            class="flex-1 p-3 border border-gray-300 rounded-l outline-none focus:ring-2 focus:ring-blue-300 mb-2 md:mb-0"
-                            required
-                        >
-                        <button 
-                            type="submit" 
-                            class="bg-blue-600 text-white p-3 px-6 rounded-r hover:bg-blue-700 transition-colors"
-                        >
-                            Search
-                        </button>
-                    </div>
-                </form>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                    <div class="bg-white p-6 rounded-lg shadow-md">
-                        <div class="text-3xl text-blue-600 mb-4">
-                            <i class="fas fa-search"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold mb-2">Find Reviews</h3>
-                        <p class="text-gray-600">Discover what others say about blogs and websites.</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-lg shadow-md">
-                        <div class="text-3xl text-blue-600 mb-4">
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold mb-2">Rate Websites</h3>
-                        <p class="text-gray-600">Share your experience with blogs you've visited.</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-lg shadow-md">
-                        <div class="text-3xl text-blue-600 mb-4">
-                            <i class="fas fa-share-alt"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold mb-2">Share Reviews</h3>
-                        <p class="text-gray-600">Generate dynamic links to share your reviews.</p>
-                    </div>
-                </div>
-                
-                <h2 class="text-2xl font-bold mb-4">Recently Reviewed</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-                    <!-- Sample recently reviewed websites -->
-                    <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                        <div class="p-4">
-                            <h3 class="font-bold mb-1">Blog Example</h3>
-                            <div class="text-sm text-yellow-400 mb-2">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="far fa-star"></i>
-                                <span class="text-gray-600 ml-1">4.0</span>
-                            </div>
-                            <a href="/example.com" class="text-blue-600 hover:underline text-sm">example.com</a>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                        <div class="p-4">
-                            <h3 class="font-bold mb-1">Tech Blog</h3>
-                            <div class="text-sm text-yellow-400 mb-2">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <i class="far fa-star"></i>
-                                <span class="text-gray-600 ml-1">3.5</span>
-                            </div>
-                            <a href="/techblog.com" class="text-blue-600 hover:underline text-sm">techblog.com</a>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                        <div class="p-4">
-                            <h3 class="font-bold mb-1">News Site</h3>
-                            <div class="text-sm text-yellow-400 mb-2">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                                <span class="text-gray-600 ml-1">4.5</span>
-                            </div>
-                            <a href="/newssite.com" class="text-blue-600 hover:underline text-sm">newssite.com</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-6">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-4 md:mb-0">
-                    <p>&copy; 2025 WebReview by pediaku.id. All rights reserved
-</p>
-</div>
-</div>
-</div>
-</footer>
+        <!-- Error Message -->
+        <div id="error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded"></div>
+    </div>
 </body>
 </html>
